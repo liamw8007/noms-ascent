@@ -13,6 +13,10 @@
 
 A vibecoded 2d platformer game.
 
+# Play online
+
+https://liamw8007.github.io/noms-ascent/ (the first load downloads Pyodide, so give it a few seconds).
+
 # Installation
 
 This game serves a dynamic webpage through Pyodide. To begin, clone the repository:
@@ -26,7 +30,10 @@ Start an HTTP server:
 $ python3 -m http.server 8000
 ```
 
-Access `127.0.0.1:8000` from a web browser.
+Access `127.0.0.1:8000` from a web browser. (Opening `index.html` directly as a file does not work.)
+
+To serve the exact build that GitHub Pages uses instead: `python3 -m http.server 8000 -d docs`.
+After changing the game, rebuild that folder with `python3 scripts/build_static.py`.
 
 # Controls
 

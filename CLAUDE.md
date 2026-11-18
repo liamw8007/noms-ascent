@@ -15,7 +15,10 @@ A course project (CYB 318 Software and Application Security): a side-view platfo
 python -m http.server 8000      # then open http://127.0.0.1:8000 (opening index.html as file:// does NOT work)
 pip install -r requirements.txt # only pytest for now
 pytest                          # pytest.ini sets pythonpath=. and testpaths=tests
+python scripts/build_static.py  # rebuild docs/ (the GitHub Pages site) after ANY change to index.html, static/, game/ or levels/
 ```
+
+`docs/` is a committed build output, served by GitHub Pages from `main` / `/docs`. A test fails if it's stale. It includes `.nojekyll`, which is required: without it Pages' Jekyll drops `game/__init__.py`.
 
 The first page load needs internet access, because Pyodide v0.27.2 is loaded from jsDelivr (pinned in `index.html`).
 
@@ -33,7 +36,7 @@ The first page load needs internet access, because Pyodide v0.27.2 is loaded fro
 - **Rules:** 3 lives; 10 points per pellet; a 100-point bonus per Moon Gate.
   - Pellets collected in a level stay collected after a death.
   - R restarts the current level and takes away that level's pellet points, but costs no life. After a win or loss it starts a new game, and it can't cancel the final death.
-- **Not built yet:** `templates/` is empty, reserved for Flask server mode (M5). There's no `app.py`, database or build script yet.
+- **Not built yet:** `templates/` is empty, reserved for Flask server mode (M5). There's no `app.py` or database yet.
 
 ## Level files (`levels/level_N.json`)
 
@@ -64,8 +67,8 @@ Physics limits for level design:
 ## Status (2026-11-17)
 
 - **Done:** M1–M4. Movement, collision, 3 levels with transitions, spikes, death animation, pellets, score, lives, game-over and win screens, the HUD and the `?` help screen.
+- **M6 in progress:** `scripts/build_static.py` builds `docs/`, verified in headless Chromium under a `/noms-ascent/` subpath. Still needed: enable Pages in the repo settings and confirm the live URL.
 - **Next:**
-  - a static build to `docs/` and GitHub Pages deployment (M6);
   - the README and Part 1 documentation (M7);
   - Flask server mode (M5), which feeds the Part 2 security review.
 - **Not done yet from the PRD:**

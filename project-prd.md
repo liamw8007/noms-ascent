@@ -187,12 +187,12 @@ Flask app (app.py)
 | High scores | SQLite through `/api/scores` | `localStorage` (this device only) |
 | Progress validation | Server-side | None (documented limitation) |
 
-A build script (`scripts/build_static.py`) does three things:
-- runs `bundle_engine.py`;
-- copies `static/` (including `engine/game.zip`) and `levels/` into `docs/`;
-- switches the front end to static mode with a config flag.
+A build script (`scripts/build_static.py`) does these things:
+- copies `index.html`, `static/`, `game/*.py` and `levels/*.json` into a fresh `docs/`;
+- writes an empty `docs/.nojekyll`. GitHub Pages runs Jekyll by default, and Jekyll drops files whose names start with `_`, which would 404 `game/__init__.py`;
+- (planned, once M5 lands) runs `bundle_engine.py` and switches the front end to static mode with a config flag.
 
-GitHub Pages serves the site from `docs/` on the main branch.
+`docs/` is committed. `tests/test_static_build.py` fails if it is out of date with the sources, so rebuild before every push. GitHub Pages serves the site from `docs/` on the main branch (Settings → Pages → Deploy from a branch → `main` / `/docs`).
 
 **Opening the files directly doesn't work.** Opening `docs/index.html` as a `file://` page fails, because browsers block `fetch()` and WebAssembly loading from `file://`. The README must therefore give the one-line `http.server` command for anyone who downloads the static build. Both modes need an internet connection the first time they load, to fetch Pyodide from the CDN (§15, Q3).
 
