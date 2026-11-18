@@ -1,0 +1,13 @@
+# Nom's Ascent — Python dependencies
+#
+# The game itself needs no third-party Python packages: game/ uses only the standard
+# library, and the local server is Python's built-in `python -m http.server`.
+#
+# Pyodide is NOT a pip package for this project. It is loaded in the browser
+# from the jsDelivr CDN, pinned in index.html (pyodide v0.27.2).
+#
+pytest>=8  # engine unit tests (tests/)
+
+# Planned additions (add each when the milestone that needs it starts):
+#   Flask         # M5 — server mode
+#   python-dotenv # M5 — loads SECRET_KEY from .env
