@@ -376,7 +376,7 @@ These are design-level notes that Part 2 will build on.
 - **CSRF:** the app uses cookie-authenticated JSON POSTs and requires `Content-Type: application/json` (§7). Part 2 decides whether to add `SameSite=Strict` cookies or a CSRF token.
 - **Third-party code:** Pyodide loads from jsDelivr at a pinned version, with a Subresource Integrity (`integrity`) hash on the `pyodide.js` script tag. Part 2 reviews a Content Security Policy for the page.
 - **Static mode:** has no server-side trust at all. Scores there are local only and labelled as such.
-- **Not present by design:** OS command execution, file uploads, filenames supplied by users, and routes that serve files by path. Level files are chosen by an integer that is checked against an allow-list, never by a path the user supplies. The engine reaches the browser as one fixed bundle (`game.zip`).
+- **Not present by design:** OS command execution, file uploads and filenames supplied by users. One route does serve files by path: Flask adds `GET /static/<path:filename>` automatically (recorded in `security/baseline.md`); the app defines no file route of its own. Level files are chosen by an integer that is checked against an allow-list, never by a path the user supplies. The engine reaches the browser as one fixed bundle (`game.zip`).
 - **Configuration:** `SECRET_KEY` comes from an environment variable or `.env` (loaded by `python-dotenv`), and a `.env.example` is committed without real values. If `SECRET_KEY` is missing or still `change-me`, the app refuses to start. It never falls back to a default key. Debug mode is off unless `FLASK_DEBUG=1` is set.
 
 ## 10. Non-Functional Requirements

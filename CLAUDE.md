@@ -78,7 +78,7 @@ The brief's 18 sections map onto this app as follows. ✅ = real material, ⚠�
 | 3 Input validation | ⚠️ level JSON (`validate()`), keyboard | ✅ `level`, `pellets`, `time`, `name`, `/api/levels/<n>`, 4 KB limit |
 | 4 XSS | ⚠️ `main.js` uses `textContent`, no `innerHTML`: a verified control | ✅ player names in the top-10 table (FR-27) |
 | 5 Injection | ❌ no DB/shell; check `runPython` with level data | ✅ SQLite queries |
-| 6 File/path | ⚠️ fixed `fetch(path)` list; no user filenames | ⚠️ still mostly N/A by design (no file-serving route) |
+| 6 File/path | ⚠️ fixed `fetch(path)` list; no user filenames | ⚠️ mostly N/A by design; the one path-taking route is Flask's built-in `/static/<path:filename>` |
 | 7 Secrets | ✅ secret scan | ✅ `SECRET_KEY`, `.env` vs `.env.example`, git history |
 | 8 Sessions/cookies | ❌ no cookies | ✅ signed `run_id` cookie, `Secure`/`HttpOnly`/`SameSite`, replay |
 | 9 Debug/prod config | ⚠️ `main.js` shows raw `"Failed to load: " + e` | ✅ `FLASK_DEBUG`, stack traces, error handlers (FR-28) |
@@ -145,6 +145,7 @@ Spec: PRD §5.2, §6.5, §7, §8, §9 and §11 (API row). This list maps that sp
 
 ## Status (2026-11-19)
 
+- **Part 2 docs** go in `security/`. Done: `security/baseline.md` (brief Part 1: inventory, diagram, attacker-control table) for `v2-pre-review`.
 - **Done:** M1–M6. Movement, collision, 3 levels with transitions, spikes, death animation, pellets, score, lives, game-over and win screens, the HUD and the `?` help screen. The static build is deployed on GitHub Pages. M5 server mode is built (all 17 steps above): 141 tests pass, and a headless-Chromium run played all 3 levels in both modes (server scores matched the engine; the submitted name appeared in the top 10; R was ignored while typing the name).
 - **Part 1 docs (M7):** README, design spec, journal, debugging write-ups and AI-code analysis are done. Only the final reflection is left (the user writes it).
 - **Tags:** `v1-original` (annotated, commit `81e4a0d`) marks the Part 1 submission. `v2-pre-review` marks the M5 build, the "before" for Part 2. Both are local only until pushed (`git push origin <tag>`).
