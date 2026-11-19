@@ -1,13 +1,12 @@
 # Nom's Ascent — Python dependencies
 #
-# The game itself needs no third-party Python packages: game/ uses only the standard
-# library, and the local server is Python's built-in `python -m http.server`.
+# The game engine (game/) uses only the standard library. Pyodide is NOT a pip
+# package for this project: it is loaded in the browser from the jsDelivr CDN,
+# pinned in templates/index.html (pyodide v0.27.2).
 #
-# Pyodide is NOT a pip package for this project. It is loaded in the browser
-# from the jsDelivr CDN, pinned in index.html (pyodide v0.27.2).
+# Versions are pinned to what the tests were run with. Werkzeug and Jinja2
+# are installed along with Flask.
 #
-pytest>=8  # engine unit tests (tests/)
-
-# Planned additions (add each when the milestone that needs it starts):
-#   Flask         # M5 — server mode
-#   python-dotenv # M5 — loads SECRET_KEY from .env
+flask==3.1.3           # server mode (app.py); its Jinja2 also renders the static build
+python-dotenv==1.2.4   # lets `flask run` read SECRET_KEY from .env
+pytest==9.2.0          # tests (tests/)

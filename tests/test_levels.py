@@ -6,7 +6,8 @@ import pytest
 from game.engine import DEATH_ANIM, DEATH_DELAY, DT, SIZE, TILE, Game
 from game.level import LevelError, load_levels, validate
 
-GOOD = {"id": 1, "name": "Test", "grid": ["." * 20] * 9 + [".S" + "." * 16 + "G.", "#" * 20]}
+GOOD = {"id": 1, "name": "Test", "min_time": 1, "max_time": 60,
+        "grid": ["." * 20] * 9 + [".S" + "." * 16 + "G.", "#" * 20]}
 
 
 def with_grid(rows):
@@ -52,6 +53,12 @@ def test_good_level_passes():
     (replace_row(0, "." * 19 + "^"), "unknown tile"),
     (replace_row(0, "." * 19 + "S"), "two starts"),
     (replace_row(9, "." * 20), "no start or goal"),
+    ({k: v for k, v in GOOD.items() if k != "min_time"}, "missing min_time"),
+    ({**GOOD, "min_time": 0}, "min_time not positive"),
+    ({**GOOD, "min_time": 60}, "min_time not below max_time"),
+    ({**GOOD, "max_time": 3601}, "max_time over an hour"),
+    ({**GOOD, "min_time": True}, "bool is not a number"),
+    ({**GOOD, "max_time": "60"}, "string is not a number"),
 ])
 def test_bad_levels_are_rejected(bad, reason):
     with pytest.raises(LevelError):

@@ -7,14 +7,34 @@
     body { margin: 0; min-height: 100vh; display: grid; place-items: center;
            background: #0b1026; color: #cfe3ff; font-family: system-ui, sans-serif; }
     canvas { background: #141b3d; border-radius: 6px; }
+    #scores { max-width: 640px; }
+    #scores h2 { font-size: 1.1rem; color: #f5e9a8; margin: 0.5rem 0; }
+    #scores table { width: 100%; border-collapse: collapse; }
+    #scores td, #scores th { padding: 2px 8px; text-align: left; }
+    #scores th { color: #8a9bc4; font-weight: normal; }
+    #score-form { margin: 0.5rem 0; }
   </style>
 </head>
-<body>
+<!-- mode is "server" when Flask renders this page and "static" in the GitHub Pages build. -->
+<body data-mode="static">
   <main>
     <canvas id="game" width="640" height="384"></canvas>
     <p id="msg">Loading Python (Pyodide)…</p>
+    <section id="scores">
+      <h2>High scores</h2>
+      <form id="score-form" hidden>
+        <label>Your name <input id="score-name" maxlength="16" required autocomplete="off"></label>
+        <button>Save score</button>
+      </form>
+      <p id="score-msg"></p>
+      <table id="score-table" hidden>
+        <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Levels</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
   </main>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+  <script src="static/js/api.js"></script>
   <script src="static/js/main.js"></script>
 </body>
 </html>

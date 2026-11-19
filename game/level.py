@@ -10,17 +10,34 @@ LEVEL_COUNT = 3
 TILES = set(".#xoSG")  # empty, solid, hazard (spikes), pellet, start, goal
 MIN_COLS, MAX_COLS = 20, 400
 MIN_ROWS, MAX_ROWS = 10, 60
+MAX_TIME_LIMIT = 3600  # seconds; no level's max_time may be longer than this
 
 
 class LevelError(ValueError):
     """A level file is missing, malformed or breaks a rule."""
 
 
+def is_number(value):
+    """True for an int or float, but not a bool (in Python, True is an int)."""
+    return type(value) in (int, float)
+
+
+def pellet_ids(grid, level_number):
+    """IDs of the pellets ('o' tiles) in a grid, mapped to their (col, row).
+
+    Numbered in reading order (left to right, then top to bottom) as
+    L<level>-P<nn>, so IDs are unique across levels. The engine and the server
+    both use this function, so they always agree on the IDs.
+    """
+    spots = [(c, r) for r, line in enumerate(grid) for c, ch in enumerate(line) if ch == "o"]
+    return {f"L{level_number}-P{i:02d}": spot for i, spot in enumerate(spots, start=1)}
+
+
 def validate(data, expected_id):
-    """Check one parsed level and return a clean copy: {"id", "name", "grid"}."""
+    """Check one parsed level and return a clean copy of its known keys."""
     if not isinstance(data, dict):
         raise LevelError("level must be a JSON object")
-    missing = {"id", "name", "grid"} - data.keys()
+    missing = {"id", "name", "grid", "min_time", "max_time"} - data.keys()
     if missing:
         raise LevelError(f"missing keys: {sorted(missing)}")
 
@@ -45,7 +62,14 @@ def validate(data, expected_id):
         if text.count(ch) != 1:
             raise LevelError(f"level needs exactly one {ch!r} tile")
 
-    return {"id": level_id, "name": name, "grid": list(grid)}
+    # The server rejects a level completion faster than min_time or slower than max_time.
+    min_time, max_time = data["min_time"], data["max_time"]
+    if not (is_number(min_time) and is_number(max_time)
+            and 0 < min_time < max_time <= MAX_TIME_LIMIT):
+        raise LevelError(f"need 0 < min_time < max_time <= {MAX_TIME_LIMIT}")
+
+    return {"id": level_id, "name": name, "grid": list(grid),
+            "min_time": min_time, "max_time": max_time}
 
 
 def load_levels(directory="levels"):

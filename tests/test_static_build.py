@@ -1,12 +1,12 @@
 """The committed docs/ folder is what GitHub Pages serves, so it must match a fresh build."""
 import filecmp
-import importlib.util
+import io
+import zipfile
 from pathlib import Path
 
+from scripts.build_static import build
+
 ROOT = Path(__file__).resolve().parent.parent
-spec = importlib.util.spec_from_file_location("build_static", ROOT / "scripts" / "build_static.py")
-build_static = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(build_static)
 
 
 def files_under(d):
@@ -14,15 +14,17 @@ def files_under(d):
 
 
 def test_docs_matches_fresh_build(tmp_path):
-    fresh = build_static.build(tmp_path / "docs")
+    fresh = build(tmp_path / "docs")
     assert files_under(ROOT / "docs") == files_under(fresh), "run: python scripts/build_static.py"
     for rel in files_under(fresh):
         assert filecmp.cmp(ROOT / "docs" / rel, fresh / rel, shallow=False), \
             f"docs/{rel} is stale; run: python scripts/build_static.py"
 
 
-def test_build_disables_jekyll(tmp_path):
-    # Without .nojekyll, Pages drops game/__init__.py (leading underscore).
-    out = build_static.build(tmp_path / "docs")
+def test_build_is_static_mode_with_engine_zip(tmp_path):
+    out = build(tmp_path / "docs")
     assert (out / ".nojekyll").exists()
-    assert (out / "game" / "__init__.py").exists()
+    assert 'data-mode="static"' in (out / "index.html").read_text()
+    names = zipfile.ZipFile(io.BytesIO((out / "engine" / "game.zip").read_bytes())).namelist()
+    assert "game/__init__.py" in names
+    assert not any("__pycache__" in n for n in names)

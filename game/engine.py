@@ -3,6 +3,7 @@
 Pure Python: no Flask, js or Pyodide imports, so it runs the same in the
 browser (Pyodide) and under plain pytest. Levels come from game/level.py.
 """
+from .level import pellet_ids
 
 TILE = 32
 DT = 1 / 60            # fixed timestep, seconds
@@ -53,6 +54,7 @@ class Game:
         """Replay the current level from scratch: its pellets and their points are reset."""
         self.score = self.level_start_score
         self.collected = set()
+        self.level_time = 0.0
         self.respawn()
 
     def press_restart(self):
@@ -66,14 +68,11 @@ class Game:
         self.grid = self.levels[self.level_index]["grid"]
         self.rows, self.cols = len(self.grid), len(self.grid[0])
         self.start = self._find("S")
-        # Pellets are 'o' tiles. Their IDs follow reading order (L2-P01, L2-P02, ...),
-        # so every pellet in the game has a unique ID.
-        spots = [(c, r) for r, line in enumerate(self.grid)
-                 for c, ch in enumerate(line) if ch == "o"]
-        self.pellets = {f"L{self.level_index + 1}-P{i:02d}": spot
-                        for i, spot in enumerate(spots, start=1)}
+        # Pellets are 'o' tiles with IDs like L2-P01 (see level.pellet_ids).
+        self.pellets = pellet_ids(self.grid, self.level_index + 1)
         self.level_start_score = self.score
         self.collected = set()
+        self.level_time = 0.0   # seconds in this level, deaths included; sent to the server
         self.respawn()
 
     def respawn(self):
@@ -139,6 +138,8 @@ class Game:
 
     def step(self, left, right, jump):
         """Advance one fixed timestep. Returns the state the renderer needs."""
+        if self.status in ("playing", "dying"):
+            self.level_time += DT
         if self.status == "dying":
             self._advance_death()
             return self.state()
@@ -216,6 +217,11 @@ class Game:
                     self.y < py + half and self.y + SIZE > py - half):
                 self.collected.add(pid)
                 self.score += PELLET_POINTS
+
+    def progress(self):
+        """What server mode reports when a level is finished (POST /api/progress)."""
+        return {"level": self.level_index + 1, "pellets": sorted(self.collected),
+                "time": round(self.level_time, 3)}
 
     def state(self):
         return {"x": self.x, "y": self.y, "size": SIZE, "facing": self.facing,
