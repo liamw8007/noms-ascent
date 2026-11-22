@@ -3,17 +3,11 @@
 <head>
   <meta charset="utf-8">
   <title>Nom's Ascent</title>
-  <style>
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center;
-           background: #0b1026; color: #cfe3ff; font-family: system-ui, sans-serif; }
-    canvas { background: #141b3d; border-radius: 6px; }
-    #scores { max-width: 640px; }
-    #scores h2 { font-size: 1.1rem; color: #f5e9a8; margin: 0.5rem 0; }
-    #scores table { width: 100%; border-collapse: collapse; }
-    #scores td, #scores th { padding: 2px 8px; text-align: left; }
-    #scores th { color: #8a9bc4; font-weight: normal; }
-    #score-form { margin: 0.5rem 0; }
-  </style>
+  <!-- Content Security Policy (SEC-03/05): only this site's own files may run or be fetched.
+       'wasm-unsafe-eval' lets Pyodide compile its WebAssembly. The server also sends this
+       policy as a header (plus frame-ancestors, which a meta tag can't set). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <link rel="stylesheet" href="static/css/game.css">
 </head>
 <!-- mode is "server" when Flask renders this page and "static" in the GitHub Pages build. -->
 <body data-mode="{{ mode }}">
@@ -33,7 +27,8 @@
       </table>
     </section>
   </main>
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+  <!-- Pyodide 314.0.8, hosted with the game (SEC-03): see static/pyodide/README.md -->
+  <script src="static/pyodide/pyodide.js"></script>
   <script src="static/js/api.js"></script>
   <script src="static/js/main.js"></script>
 </body>

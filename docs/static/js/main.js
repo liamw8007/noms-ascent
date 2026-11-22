@@ -18,7 +18,8 @@ async function fetchOk(path) {
 }
 
 async function main() {
-  const pyodide = await loadPyodide();
+  // Pyodide's runtime files are served by this site, never a CDN (SEC-03).
+  const pyodide = await loadPyodide({ indexURL: new URL("static/pyodide/", location.href).href });
   // The engine arrives as one zip (scripts/bundle_engine.py), unpacked to game/ in
   // Pyodide's virtual filesystem. The level files are copied in next to it.
   pyodide.unpackArchive(await (await fetchOk("engine/game.zip")).arrayBuffer(), "zip");

@@ -363,7 +363,6 @@ def test_security_headers_are_set(client, path):
     assert "unsafe-inline" not in csp and "'unsafe-eval'" not in csp
 
 
-@open_finding("SEC-03")
 def test_the_page_loads_no_third_party_code(client):
     page = client.get("/").get_data(as_text=True)
     assert not re.search(r"""(src|href)=["']?(https?:)?//""", page)
