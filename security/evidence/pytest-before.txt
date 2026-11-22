@@ -1,0 +1,23 @@
+# pytest on the unfixed code (branch hardening, before any Part 14 fix), 2026-11-22T23:20:51Z
+........................................................................ [ 60%]
+..........................................................xxxxx......... [ 91%]
+....xx..xx.xxxxxxxx..                                                    [100%]
+=========================== short test summary info ============================
+XFAIL tests/test_security.py::test_a_script_cannot_finish_a_level_faster_than_real_time - SEC-01 not fixed yet
+XFAIL tests/test_security.py::test_the_reported_time_cannot_exceed_the_real_time - SEC-01 not fixed yet
+XFAIL tests/test_security.py::test_each_level_is_timed_from_when_the_previous_one_was_accepted - SEC-01 not fixed yet
+XFAIL tests/test_security.py::test_the_number_of_active_runs_is_capped - SEC-02 not fixed yet
+XFAIL tests/test_security.py::test_only_the_top_scores_are_kept - SEC-02 not fixed yet
+XFAIL tests/test_security.py::test_static_build_template_escapes_values - SEC-11 not fixed yet
+XFAIL tests/test_security.py::test_load_errors_are_not_shown_raw_to_the_player - SEC-09 not fixed yet
+XFAIL tests/test_security.py::test_weak_secret_keys_are_refused[short] - SEC-06 not fixed yet
+XFAIL tests/test_security.py::test_weak_secret_keys_are_refused[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] - SEC-06 not fixed yet
+XFAIL tests/test_security.py::test_session_cookie_flags - SEC-04 not fixed yet
+XFAIL tests/test_security.py::test_security_headers_are_set[/] - SEC-05 not fixed yet
+XFAIL tests/test_security.py::test_security_headers_are_set[/api/scores] - SEC-05 not fixed yet
+XFAIL tests/test_security.py::test_security_headers_are_set[/nope] - SEC-05 not fixed yet
+XFAIL tests/test_security.py::test_the_page_loads_no_third_party_code - SEC-03 not fixed yet
+XFAIL tests/test_security.py::test_cross_site_posts_are_refused - SEC-08 not fixed yet
+XFAIL tests/test_security.py::test_runtime_requirements_are_fully_pinned_with_hashes - SEC-07 not fixed yet
+XFAIL tests/test_security.py::test_the_build_refuses_symlinks - SEC-10 not fixed yet
+220 passed, 17 xfailed in 0.77s

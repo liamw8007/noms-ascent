@@ -1,26 +1,10 @@
 """Server mode: the Flask API in app.py, using Flask's test client."""
 import pytest
 
-from app import create_app
+from conftest import finish, start
 from config import ConfigError, load_config
 
 FAST_L1 = 2.1  # level 1's min_time
-
-
-@pytest.fixture
-def client(tmp_path):
-    app = create_app({"TESTING": True, "SECRET_KEY": "test",
-                      "DATABASE": str(tmp_path / "test.db")})
-    return app.test_client()
-
-
-def start(client):
-    assert client.post("/api/runs", json={}).status_code == 200
-
-
-def finish(client, level, pellets=(), time=30.0):
-    return client.post("/api/progress", json={"level": level, "pellets": list(pellets),
-                                              "time": time})
 
 
 # --- Configuration -----------------------------------------------------------
