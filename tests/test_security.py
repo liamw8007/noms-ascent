@@ -331,7 +331,6 @@ def test_debug_is_off_by_default(monkeypatch, tmp_path):
     assert app.debug is False and app.testing is False
 
 
-@open_finding("SEC-06")
 @pytest.mark.parametrize("key", ["short", "a" * 31])
 def test_weak_secret_keys_are_refused(monkeypatch, key):
     monkeypatch.setenv("SECRET_KEY", key)
