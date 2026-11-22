@@ -48,6 +48,15 @@ SECURITY_HEADERS = {
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    # Session cookie (SEC-04). Flask's defaults are False / unset / 31 days, so these
+    # are assigned, not setdefault. They come before the config below so tests can
+    # still override them.
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,           # only ever sent over HTTPS (or localhost)
+        SESSION_COOKIE_HTTPONLY=True,         # already the default; stated so it's checked
+        SESSION_COOKIE_SAMESITE="Strict",     # never sent on requests from other sites
+        PERMANENT_SESSION_LIFETIME=db.RUN_LIFETIME,  # the cookie expires with its run (24 h)
+    )
     app.config.update(test_config if test_config is not None else load_config())
     app.config.setdefault("DATABASE", os.path.join(app.instance_path, "scores.db"))
     # A fixed rule, not a setting: request bodies over 4 KB get 413. (Not setdefault:
@@ -121,6 +130,7 @@ def create_app(test_config=None):
         if run_id is None:
             abort(503)   # too many active runs: try again later
         session["run_id"] = run_id
+        session.permanent = True   # gives the cookie a Max-Age (PERMANENT_SESSION_LIFETIME)
         return jsonify(ok=True)
 
     @app.post("/api/progress")

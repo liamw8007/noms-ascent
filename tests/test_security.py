@@ -344,11 +344,16 @@ def test_a_strong_secret_key_is_accepted(monkeypatch):
     assert load_config()["SECRET_KEY"] == "0123456789abcdef" * 4
 
 
-@open_finding("SEC-04")
 def test_session_cookie_flags(client):
+    from datetime import datetime, timedelta, timezone
+    from email.utils import parsedate_to_datetime
     cookie = start(client).headers["Set-Cookie"]
-    for flag in ("Secure", "HttpOnly", "SameSite=Strict", "Max-Age=86400"):
+    for flag in ("Secure", "HttpOnly", "SameSite=Strict"):
         assert flag in cookie, flag
+    # Flask sets the 24 h lifetime as an Expires date (from the real clock, not db.clock).
+    expires = parsedate_to_datetime(re.search(r"Expires=([^;]+)", cookie).group(1))
+    left = expires - datetime.now(timezone.utc)
+    assert timedelta(hours=23, minutes=59) < left <= timedelta(hours=24)
 
 
 @pytest.mark.parametrize("path", ["/", "/api/scores", "/nope"])
