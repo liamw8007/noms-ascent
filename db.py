@@ -54,6 +54,9 @@ def init_db(path):
         if columns and "level_started_at" not in columns:
             conn.execute("DROP TABLE runs")
         conn.executescript(SCHEMA)
+        # Write-ahead logging: readers don't block the single writer, so a burst of
+        # requests waits briefly instead of failing with "database is locked" (SEC-02).
+        conn.execute("PRAGMA journal_mode=WAL")
     finally:
         conn.close()
 
@@ -73,11 +76,18 @@ def close_db(_exc=None):
 
 # --- Runs ----------------------------------------------------------------------
 
-def start_run(old_run_id=None):
-    """Create a run and return its ID. Drops the session's old run and expired runs."""
+def start_run(old_run_id, max_runs):
+    """Create a run and return its ID, or None if max_runs runs are already active.
+
+    Drops the session's old run and expired runs first, so the cap counts only
+    runs from the last 24 hours (SEC-02: otherwise the table could grow forever).
+    """
     db = get_db()
     db.execute("DELETE FROM runs WHERE created_at < ? OR run_id = ?",
                (now(minus=RUN_LIFETIME), old_run_id))
+    if db.execute("SELECT COUNT(*) FROM runs").fetchone()[0] >= max_runs:
+        db.commit()  # keep the clean-up
+        return None
     run_id = secrets.token_urlsafe(16)
     db.execute("INSERT INTO runs (run_id, next_level, accepted_score, levels_completed,"
                " submitted, created_at, level_started_at) VALUES (?, 1, 0, 0, 0, ?, ?)",
@@ -112,11 +122,12 @@ def accept_progress(run_id, level, points):
 
 # --- Scores --------------------------------------------------------------------
 
-def submit_score(run_id, name):
+def submit_score(run_id, name, keep):
     """Save the run's server-calculated score under name. Returns the rank, or None.
 
     Marking the run submitted and inserting the score happen in one transaction,
     and the UPDATE only matches an unsubmitted run, so a run is saved at most once.
+    Only the best `keep` scores are stored (SEC-02), in the same order as top_scores().
     """
     db = get_db()
     with db:  # commits on success, rolls back on an exception
@@ -130,6 +141,8 @@ def submit_score(run_id, name):
         db.execute("INSERT INTO scores (name, score, levels_completed, created_at)"
                    " VALUES (?, ?, ?, ?)",
                    (name, run["accepted_score"], run["levels_completed"], now()))
+        db.execute("DELETE FROM scores WHERE id NOT IN (SELECT id FROM scores"
+                   " ORDER BY score DESC, created_at ASC, id ASC LIMIT ?)", (keep,))
     # Tied scores share a rank: 1 + the number of strictly higher scores.
     higher = db.execute("SELECT COUNT(*) FROM scores WHERE score > ?",
                         (run["accepted_score"],)).fetchone()[0]

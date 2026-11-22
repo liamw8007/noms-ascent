@@ -194,7 +194,6 @@ def test_each_level_is_timed_from_when_the_previous_one_was_accepted(client):
     assert progress(client, {"level": 2, "pellets": [], "time": 30}).status_code == 200
 
 
-@open_finding("SEC-02")
 def test_the_number_of_active_runs_is_capped(app, clock):
     app.config["MAX_ACTIVE_RUNS"] = 3
     clients = [app.test_client() for _ in range(4)]
@@ -207,12 +206,11 @@ def test_the_number_of_active_runs_is_capped(app, clock):
     assert clients[3].post("/api/runs", json={}).status_code == 200
 
 
-@open_finding("SEC-02")
 def test_only_the_top_scores_are_kept(app, client):
     app.config["SCORES_KEPT"] = 3
     for i in range(5):
         start(client)
-        finish(client, 1, ["L1-P01"] * 0 + [f"L1-P0{j}" for j in range(1, i + 1)])
+        finish(client, 1, [f"L1-P0{j}" for j in range(1, i + 1)])   # score 100 + 10*i
         client.post("/api/scores", json={"name": f"P{i}"})
     with app.app_context():
         count = db.get_db().execute("SELECT COUNT(*) FROM scores").fetchone()[0]

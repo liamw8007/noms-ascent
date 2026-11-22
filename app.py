@@ -39,6 +39,9 @@ def create_app(test_config=None):
     # A fixed rule, not a setting: request bodies over 4 KB get 413. (Not setdefault:
     # Flask's built-in config already has this key, set to None, meaning "no limit".)
     app.config["MAX_CONTENT_LENGTH"] = 4 * 1024
+    # Storage limits (SEC-02). Per-IP rate limiting belongs in the reverse proxy.
+    app.config.setdefault("MAX_ACTIVE_RUNS", 10_000)  # runs started in the last 24 h
+    app.config.setdefault("SCORES_KEPT", 100)         # the scores table keeps only the best
 
     os.makedirs(app.instance_path, exist_ok=True)
     db.init_db(app.config["DATABASE"])
@@ -93,7 +96,10 @@ def create_app(test_config=None):
     @app.post("/api/runs")
     def new_run():
         json_body()
-        session["run_id"] = db.start_run(old_run_id=session.get("run_id"))
+        run_id = db.start_run(session.get("run_id"), app.config["MAX_ACTIVE_RUNS"])
+        if run_id is None:
+            abort(503)   # too many active runs: try again later
+        session["run_id"] = run_id
         return jsonify(ok=True)
 
     @app.post("/api/progress")
@@ -122,7 +128,7 @@ def create_app(test_config=None):
         name = name.strip()
         if not NAME_RE.fullmatch(name) or set(name) <= {" ", "_"}:
             abort(400)
-        rank = db.submit_score(current_run()["run_id"], name)
+        rank = db.submit_score(current_run()["run_id"], name, app.config["SCORES_KEPT"])
         if rank is None:   # no level completed yet, or this run was already submitted
             abort(400)
         return jsonify(ok=True, rank=rank)
