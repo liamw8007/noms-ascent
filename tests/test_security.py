@@ -301,7 +301,6 @@ def test_server_mode_template_escapes_values(app):
     assert "<script>alert(1)" not in page and "&lt;script&gt;" in page
 
 
-@open_finding("SEC-11")
 def test_static_build_template_escapes_values():
     from scripts.build_static import render_page
     page = render_page('"><script>alert(1)</script>')

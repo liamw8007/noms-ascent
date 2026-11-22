@@ -8,13 +8,23 @@ import shutil
 import sys
 from pathlib import Path
 
-from jinja2 import Template  # installed with Flask
+from jinja2 import Environment  # installed with Flask
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))  # so this works as a script as well as an import
 from scripts.bundle_engine import make_zip, refuse_symlinks  # noqa: E402
 
 OUT = ROOT / "docs"
+
+
+def render_page(mode):
+    """Render templates/index.html for the given mode, HTML-escaping values (SEC-11).
+
+    A bare jinja2.Template doesn't escape, unlike Flask's render_template, so a
+    value with markup in it would go into the page as-is.
+    """
+    env = Environment(autoescape=True)
+    return env.from_string((ROOT / "templates" / "index.html").read_text(encoding="utf-8")).render(mode=mode)
 
 
 def build(out=OUT):
@@ -24,8 +34,7 @@ def build(out=OUT):
         shutil.rmtree(out)  # start clean so deleted files don't linger in the build
     out.mkdir(parents=True)
 
-    page = Template((ROOT / "templates" / "index.html").read_text(encoding="utf-8"))
-    (out / "index.html").write_text(page.render(mode="static"), encoding="utf-8")
+    (out / "index.html").write_text(render_page("static"), encoding="utf-8")
     shutil.copytree(ROOT / "static", out / "static")
     (out / "engine").mkdir()
     (out / "engine" / "game.zip").write_bytes(make_zip())
