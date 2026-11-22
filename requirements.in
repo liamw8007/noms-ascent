@@ -1,0 +1,10 @@
+# Nom's Ascent: runtime dependencies for server mode (the input for requirements.txt).
+#
+# The game engine (game/) uses only the standard library. Pyodide is not a pip
+# package here: it is served from static/pyodide/ (see the README there).
+#
+# requirements.txt is generated from this file with every package, direct or
+# indirect, pinned to an exact version and SHA-256 hashes (SEC-07):
+#   uv pip compile requirements.in --universal --generate-hashes -o requirements.txt
+flask==3.1.3           # server mode (app.py); its Jinja2 also renders the static build
+python-dotenv==1.2.4   # lets `flask run` read SECRET_KEY from .env

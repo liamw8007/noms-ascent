@@ -391,7 +391,6 @@ def test_cross_site_posts_are_refused(client):
     assert client.post("/api/runs", json={}, headers={"Origin": "http://localhost.evil.example"}).status_code == 403
 
 
-@open_finding("SEC-07")
 def test_runtime_requirements_are_fully_pinned_with_hashes():
     text = (ROOT / "requirements.txt").read_text()
     reqs = re.findall(r"^([A-Za-z0-9_.\-\[\]]+)==\S+ \\\n((?:\s+--hash=sha256:[0-9a-f]{64}.*\n?)+)",

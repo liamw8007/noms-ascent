@@ -1,0 +1,6 @@
+# Development tools: tests and security scanning (the input for requirements-dev.txt).
+# Includes everything in requirements.in, so one install is enough:
+#   uv pip compile requirements-dev.in --universal --generate-hashes -o requirements-dev.txt
+-r requirements.in
+pytest==9.2.0          # tests (tests/)
+bandit==1.9.4          # static security analysis (security/automated-testing.md)
