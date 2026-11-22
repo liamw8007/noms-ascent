@@ -6,11 +6,16 @@ app closes it when the request ends.
 """
 import secrets
 import sqlite3
+import time
 from datetime import datetime, timedelta, timezone
 
 from flask import current_app, g
 
 RUN_LIFETIME = timedelta(hours=24)
+
+# Seconds since 1970. Every time in this file comes from here, so tests can
+# swap in a fake clock instead of waiting in real time.
+clock = time.time
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
@@ -19,7 +24,8 @@ CREATE TABLE IF NOT EXISTS runs (
     accepted_score   INTEGER NOT NULL,  -- calculated by the server
     levels_completed INTEGER NOT NULL,
     submitted        INTEGER NOT NULL,  -- 1 once a score was saved for this run
-    created_at       TEXT NOT NULL
+    created_at       TEXT NOT NULL,
+    level_started_at REAL NOT NULL      -- server clock() when next_level began (SEC-01)
 );
 CREATE TABLE IF NOT EXISTS scores (
     id               INTEGER PRIMARY KEY,
@@ -31,14 +37,22 @@ CREATE TABLE IF NOT EXISTS scores (
 """
 
 
-def now():
-    # ISO-8601 UTC with a fixed format, so timestamps also sort correctly as text.
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+def now(minus=timedelta()):
+    """The current UTC time, minus an optional amount, as ISO-8601 text.
+
+    The fixed format means timestamps also sort correctly as text.
+    """
+    return (datetime.fromtimestamp(clock(), timezone.utc) - minus).isoformat(timespec="seconds")
 
 
 def init_db(path):
     conn = sqlite3.connect(path)
     try:
+        # A runs table from before SEC-01 has no level_started_at column. Runs only
+        # last 24 hours, so it is simply dropped and created again.
+        columns = [row[1] for row in conn.execute("PRAGMA table_info(runs)")]
+        if columns and "level_started_at" not in columns:
+            conn.execute("DROP TABLE runs")
         conn.executescript(SCHEMA)
     finally:
         conn.close()
@@ -62,10 +76,12 @@ def close_db(_exc=None):
 def start_run(old_run_id=None):
     """Create a run and return its ID. Drops the session's old run and expired runs."""
     db = get_db()
-    cutoff = (datetime.now(timezone.utc) - RUN_LIFETIME).isoformat(timespec="seconds")
-    db.execute("DELETE FROM runs WHERE created_at < ? OR run_id = ?", (cutoff, old_run_id))
+    db.execute("DELETE FROM runs WHERE created_at < ? OR run_id = ?",
+               (now(minus=RUN_LIFETIME), old_run_id))
     run_id = secrets.token_urlsafe(16)
-    db.execute("INSERT INTO runs VALUES (?, 1, 0, 0, 0, ?)", (run_id, now()))
+    db.execute("INSERT INTO runs (run_id, next_level, accepted_score, levels_completed,"
+               " submitted, created_at, level_started_at) VALUES (?, 1, 0, 0, 0, ?, ?)",
+               (run_id, now(), clock()))
     db.commit()
     return run_id
 
@@ -74,9 +90,8 @@ def get_run(run_id):
     """The run's row, or None if it doesn't exist or is older than 24 hours."""
     if not run_id:
         return None
-    cutoff = (datetime.now(timezone.utc) - RUN_LIFETIME).isoformat(timespec="seconds")
-    return get_db().execute(
-        "SELECT * FROM runs WHERE run_id = ? AND created_at >= ?", (run_id, cutoff)).fetchone()
+    return get_db().execute("SELECT * FROM runs WHERE run_id = ? AND created_at >= ?",
+                            (run_id, now(minus=RUN_LIFETIME))).fetchone()
 
 
 def accept_progress(run_id, level, points):
@@ -88,9 +103,9 @@ def accept_progress(run_id, level, points):
     db = get_db()
     cur = db.execute(
         "UPDATE runs SET next_level = next_level + 1, accepted_score = accepted_score + ?,"
-        " levels_completed = levels_completed + 1"
+        " levels_completed = levels_completed + 1, level_started_at = ?"
         " WHERE run_id = ? AND next_level = ? AND submitted = 0",
-        (points, run_id, level))
+        (points, clock(), run_id, level))
     db.commit()
     return cur.rowcount == 1
 

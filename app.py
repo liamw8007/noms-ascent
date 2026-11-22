@@ -105,7 +105,8 @@ def create_app(test_config=None):
         if type(level_n) is not int or level_n != run["next_level"] or level_n > len(levels):
             abort(400)
         try:
-            points = check_progress(body, levels[level_n - 1])
+            elapsed = db.clock() - run["level_started_at"]   # measured by the server (SEC-01)
+            points = check_progress(body, levels[level_n - 1], elapsed)
         except ProgressError:
             abort(400)
         if not db.accept_progress(run["run_id"], level_n, points):

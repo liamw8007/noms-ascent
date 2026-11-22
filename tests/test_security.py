@@ -170,7 +170,6 @@ def test_a_run_can_be_submitted_only_once(client):
     assert finish(client, 2).status_code == 400      # no more progress after submitting
 
 
-@open_finding("SEC-01")
 def test_a_script_cannot_finish_a_level_faster_than_real_time(client):
     # SEC-01: a script claims every pellet at min_time, the moment the run starts.
     start(client)
@@ -181,14 +180,12 @@ def test_a_script_cannot_finish_a_level_faster_than_real_time(client):
     assert progress(client, body).status_code == 200          # now it's possible
 
 
-@open_finding("SEC-01")
 def test_the_reported_time_cannot_exceed_the_real_time(client):
     start(client)
     client.clock.advance(10)
     assert progress(client, {"level": 1, "pellets": [], "time": 60}).status_code == 400
 
 
-@open_finding("SEC-01")
 def test_each_level_is_timed_from_when_the_previous_one_was_accepted(client):
     start(client)
     assert finish(client, 1, time=30).status_code == 200

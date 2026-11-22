@@ -3,7 +3,7 @@ import pytest
 
 from game.engine import DT, MAX_SPEED, SIZE, TILE, Game
 from game.level import load_levels, pellet_ids
-from game.validation import ProgressError, check_progress
+from game.validation import CLOCK_SLACK, ProgressError, check_progress
 
 GRID = ["." * 20] * 9 + [".S.o.o..........G.", "#" * 20]
 LEVEL = {"id": 1, "name": "Test", "grid": GRID, "min_time": 1, "max_time": 60}
@@ -29,7 +29,7 @@ def test_engine_progress_passes_the_server_check():
     walk_to_goal(g)
     p = g.progress()
     assert p["level"] == 1 and p["pellets"] == ["L1-P01", "L1-P02"]
-    assert check_progress(p, LEVEL) == 2 * 10 + 100
+    assert check_progress(p, LEVEL, elapsed=p["time"]) == 2 * 10 + 100
 
 
 @pytest.mark.parametrize("body", [
@@ -48,7 +48,15 @@ def test_engine_progress_passes_the_server_check():
 ])
 def test_bad_progress_is_rejected(body):
     with pytest.raises(ProgressError):
-        check_progress(body, LEVEL)
+        check_progress(body, LEVEL, elapsed=3600)
+
+
+def test_progress_faster_than_the_server_clock_is_rejected():
+    body = {"level": 1, "pellets": [], "time": 10}
+    assert check_progress(body, LEVEL, elapsed=10) == 100
+    assert check_progress(body, LEVEL, elapsed=10 - CLOCK_SLACK) == 100   # within the slack
+    with pytest.raises(ProgressError):
+        check_progress(body, LEVEL, elapsed=10 - CLOCK_SLACK - 0.1)
 
 
 def test_min_time_never_rejects_a_genuine_fast_run():
