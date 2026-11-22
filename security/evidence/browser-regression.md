@@ -1,0 +1,71 @@
+
+## server mode (http://127.0.0.1:5077/): 35/35 checks passed
+- [x] page loads and engine starts
+- [x] starts on level 1 with 3 lives and 0 points
+- [x] Nom is drawn on the canvas
+- [x] ArrowRight moves right (34 -> 136)
+- [x] A moves left (136 -> 62)
+- [x] Space jumps (full hold reaches ~3 tiles) (rose 108 px)
+- [x] Nom lands back on the floor (collision)
+- [x] ArrowUp tap gives a shorter hop than a held jump (rose 24 px)
+- [x] the world edge stops Nom
+- [x] ? opens help and pauses the game
+- [x] Esc closes help and resumes
+- [x] pellets are collected (+10 each) (2 -> 4 pellets)
+- [x] falling out of the world costs a life
+- [x] respawn after the death animation, pellets kept
+- [x] R restarts the level: pellet points removed, no life lost
+- [x] level 1 can be completed (level_complete)
+- [x] server accepted level 1; server score = engine score (Level 1 recorded. Server score: 110. engine=110)
+- [x] Enter moves on to level 2
+- [x] spikes cost a life (level 2)
+- [x] level 2 can be completed (level_complete)
+- [x] server accepted level 2; server score = engine score (Level 2 recorded. Server score: 220. engine=220)
+- [x] Enter moves on to level 3
+- [x] level 3 can be completed (won)
+- [x] server accepted level 3; server score = engine score (Level 3 recorded. Server score: 330. engine=330)
+- [x] the name form appears after the win
+- [x] R is ignored while typing a name
+- [x] the score is saved (Saved! You are #1.)
+- [x] the name and score appear in the top-10 table (["1","Regressr","330","3"])
+- [x] R after a win starts a new game
+- [x] losing all 3 lives ends the game
+- [x] R after a loss can't cancel it but starts a new game
+- [x] no CSP violations
+- [x] no JavaScript errors
+- [x] no requests to other sites
+- [x] API calls succeeded (/api/levels/1 200, /api/levels/2 200, /api/levels/3 200, /api/scores 200, /api/runs 200, /api/progress 200, /api/progress 200, /api/progress 200, /api/scores 200, /api/scores 200, /api/runs 200, /api/runs 200)
+
+## static mode (http://127.0.0.1:8077/): 32/32 checks passed
+- [x] page loads and engine starts
+- [x] starts on level 1 with 3 lives and 0 points
+- [x] Nom is drawn on the canvas
+- [x] ArrowRight moves right (34 -> 132)
+- [x] A moves left (132 -> 58)
+- [x] Space jumps (full hold reaches ~3 tiles) (rose 108 px)
+- [x] Nom lands back on the floor (collision)
+- [x] ArrowUp tap gives a shorter hop than a held jump (rose 24 px)
+- [x] the world edge stops Nom
+- [x] ? opens help and pauses the game
+- [x] Esc closes help and resumes
+- [x] pellets are collected (+10 each) (2 -> 4 pellets)
+- [x] falling out of the world costs a life
+- [x] respawn after the death animation, pellets kept
+- [x] R restarts the level: pellet points removed, no life lost
+- [x] level 1 can be completed (level_complete)
+- [x] Enter moves on to level 2
+- [x] spikes cost a life (level 2)
+- [x] level 2 can be completed (level_complete)
+- [x] Enter moves on to level 3
+- [x] level 3 can be completed (won)
+- [x] the name form appears after the win
+- [x] R is ignored while typing a name
+- [x] the score is saved (Saved! You are #1.)
+- [x] the name and score appear in the top-10 table (["1","Regressr","330","3"])
+- [x] static mode says 'local scores only'
+- [x] R after a win starts a new game
+- [x] losing all 3 lives ends the game
+- [x] R after a loss can't cancel it but starts a new game
+- [x] no CSP violations
+- [x] no JavaScript errors
+- [x] no requests to other sites

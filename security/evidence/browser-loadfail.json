@@ -1,0 +1,2 @@
+{"url":"http://127.0.0.1:5077/","pageMessage":"The game failed to load. Please reload the page.","consoleHasDetails":["TypeError: Failed to fetch\n    at fetchOk (http://127.0.0.1:5077/static/js/main.js:15:21)\n"]}
+{"url":"http://127.0.0.1:8077/","pageMessage":"The game failed to load. Please reload the page.","consoleHasDetails":["TypeError: Failed to fetch\n    at fetchOk (http://127.0.0.1:5077/static/js/main.js:15:21)\n","TypeError: Failed to fetch\n    at fetchOk (http://127.0.0.1:8077/static/js/main.js:15:21)\n"]}

@@ -1,0 +1,13 @@
+{
+ "inlineScriptRan": false,
+ "injectedOnerrorRan": false,
+ "framedDocument": "cross-origin (no access)",
+ "browserMessages": [
+  "Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keyword, a h",
+  "Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keyword, a h",
+  "Executing inline event handler violates the following Content Security Policy directive 'script-src 'self' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keywo",
+  "Executing inline event handler violates the following Content Security Policy directive 'script-src 'self' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keywo",
+  "Framing 'http://127.0.0.1:5077/' violates the following Content Security Policy directive: \"frame-ancestors 'none'\". The request has been blocked.\n"
+ ]
+}
+rm: cannot remove '/tmp/tmp.OzdCba4M1c/chromium/Default': Directory not empty

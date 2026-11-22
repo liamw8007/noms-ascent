@@ -1,0 +1,5 @@
+# pip-audit after SEC-07, 2026-11-22T23:38:33Z
+$ pip-audit -r requirements.txt --require-hashes
+No known vulnerabilities found
+$ pip-audit -r requirements-dev.txt --require-hashes
+No known vulnerabilities found
