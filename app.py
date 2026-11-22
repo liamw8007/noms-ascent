@@ -31,6 +31,20 @@ ROOT = Path(__file__).resolve().parent
 # Trimmed name: 1-16 of these characters. fullmatch() means the whole string must match.
 NAME_RE = re.compile(r"[A-Za-z0-9 _-]{1,16}")
 
+# Content Security Policy (SEC-05): only this site's own files may run or be fetched.
+# 'wasm-unsafe-eval' lets Pyodide compile its WebAssembly. templates/index.html has
+# the same policy in a <meta> tag for the static build, minus frame-ancestors,
+# which only works as a header.
+CSP = ("default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; "
+       "img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; "
+       "form-action 'self'")
+SECURITY_HEADERS = {
+    "Content-Security-Policy": CSP + "; frame-ancestors 'none'",
+    "X-Content-Type-Options": "nosniff",   # never guess a type: JSON stays JSON
+    "X-Frame-Options": "DENY",             # no framing (clickjacking), for older browsers
+    "Referrer-Policy": "no-referrer",
+}
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -73,6 +87,13 @@ def create_app(test_config=None):
         if run is None:
             abort(400)
         return run
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.update(SECURITY_HEADERS)
+        if request.is_secure:  # only meaningful over HTTPS; tells browsers to never use HTTP
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
 
     # --- Pages -------------------------------------------------------------------
 

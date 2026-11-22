@@ -351,7 +351,6 @@ def test_session_cookie_flags(client):
         assert flag in cookie, flag
 
 
-@open_finding("SEC-05")
 @pytest.mark.parametrize("path", ["/", "/api/scores", "/nope"])
 def test_security_headers_are_set(client, path):
     h = client.get(path).headers
@@ -361,6 +360,17 @@ def test_security_headers_are_set(client, path):
     csp = h["Content-Security-Policy"]
     assert "frame-ancestors 'none'" in csp and "default-src 'self'" in csp
     assert "unsafe-inline" not in csp and "'unsafe-eval'" not in csp
+
+
+def test_the_meta_csp_matches_the_header():
+    from app import CSP
+    page = (ROOT / "templates" / "index.html").read_text()
+    assert f'http-equiv="Content-Security-Policy" content="{CSP}"' in page
+
+
+def test_hsts_is_sent_over_https_only(client):
+    assert "Strict-Transport-Security" not in client.get("/").headers
+    assert "max-age=31536000" in client.get("/", base_url="https://localhost").headers["Strict-Transport-Security"]
 
 
 def test_the_page_loads_no_third_party_code(client):
