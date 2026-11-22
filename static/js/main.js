@@ -280,4 +280,5 @@ function overlay(title, lines) {  // a message screen below the HUD bar, which s
   lines.forEach((line, i) => ctx.fillText(line, W / 2, H / 2 + 32 + i * 24));
 }
 
-main().catch((e) => { msg.textContent = "Failed to load: " + e; console.error(e); });
+// A fixed message for the player; the details go to the browser console only (SEC-09).
+main().catch((e) => { msg.textContent = "The game failed to load. Please reload the page."; console.error(e); });

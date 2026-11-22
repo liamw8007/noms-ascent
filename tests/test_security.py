@@ -308,7 +308,6 @@ def test_static_build_template_escapes_values():
     assert "<script>alert(1)" not in page and "&lt;script&gt;" in page
 
 
-@open_finding("SEC-09")
 def test_load_errors_are_not_shown_raw_to_the_player():
     main = (ROOT / "static" / "js" / "main.js").read_text()
     handler = main[main.rindex("main().catch"):]
