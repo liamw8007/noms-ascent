@@ -12,13 +12,14 @@ from jinja2 import Template  # installed with Flask
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))  # so this works as a script as well as an import
-from scripts.bundle_engine import make_zip  # noqa: E402
+from scripts.bundle_engine import make_zip, refuse_symlinks  # noqa: E402
 
 OUT = ROOT / "docs"
 
 
 def build(out=OUT):
     out = Path(out)
+    refuse_symlinks(ROOT / "templates", ROOT / "static", ROOT / "levels")  # before deleting anything
     if out.exists():
         shutil.rmtree(out)  # start clean so deleted files don't linger in the build
     out.mkdir(parents=True)

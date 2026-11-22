@@ -402,7 +402,6 @@ def test_runtime_requirements_are_fully_pinned_with_hashes():
     assert "pytest" not in names                      # test tools live in requirements-dev.txt
 
 
-@open_finding("SEC-10")
 def test_the_build_refuses_symlinks(tmp_path, monkeypatch):
     import shutil
     from scripts import build_static, bundle_engine
