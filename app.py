@@ -17,6 +17,7 @@ run_id; all progress lives in the runs table (see PRD §8).
 import os
 import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from flask import Flask, Response, abort, jsonify, render_template, request, session
 from werkzeug.exceptions import HTTPException
@@ -82,6 +83,15 @@ def create_app(test_config=None):
         # preflight, which this app never approves: the first defence against CSRF.
         if request.method == "POST" and request.mimetype != "application/json":
             abort(415)
+
+    @app.before_request
+    def require_same_origin_posts():
+        # Second CSRF defence (SEC-08), so the JSON check isn't the only one: browsers
+        # send Origin on cross-site POSTs, and it must name this site. Requests with
+        # no Origin (curl, old browsers) are allowed; the cookie is SameSite=Strict too.
+        origin = request.headers.get("Origin")
+        if request.method == "POST" and origin is not None and urlsplit(origin).netloc != request.host:
+            abort(403)
 
     def json_body():
         """The parsed JSON body, or 400 if it isn't a JSON object."""

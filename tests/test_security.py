@@ -384,12 +384,13 @@ def test_the_page_loads_no_third_party_code(client):
     assert (ROOT / "static" / "pyodide" / "pyodide.asm.wasm").is_file()
 
 
-@open_finding("SEC-08")
 def test_cross_site_posts_are_refused(client):
     res = client.post("/api/runs", json={}, headers={"Origin": "https://evil.example"})
     assert res.status_code == 403
     assert client.post("/api/runs", json={}, headers={"Origin": "http://localhost"}).status_code == 200
     assert client.post("/api/runs", json={}).status_code == 200      # no Origin header: allowed
+    assert client.post("/api/runs", json={}, headers={"Origin": "null"}).status_code == 403
+    assert client.post("/api/runs", json={}, headers={"Origin": "http://localhost.evil.example"}).status_code == 403
 
 
 @open_finding("SEC-07")
